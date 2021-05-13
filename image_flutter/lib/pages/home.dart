@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -6,10 +10,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var imageFile;
+  var _imageFile;
+
+  void _imgFromGalery() async {
+    try {
+      var imagePicker = ImagePicker();
+      var imageSelected =
+          await imagePicker.getImage(source: ImageSource.gallery);
+
+      setState(() {
+        _imageFile = File(imageSelected.path);
+      });
+    } catch (error) {}
+  }
+
+  void _imgFromCamera() async {
+    try {
+      var imagePicker = ImagePicker();
+      var imageSelected =
+          await imagePicker.getImage(source: ImageSource.camera);
+
+      setState(() {
+        _imageFile = File(imageSelected.path);
+      });
+    } catch (error) {}
+  }
 
   Widget _imgOuIcon() {
-    if (imageFile == null) {
+    if (_imageFile == null) {
       return Container(
         height: 350,
         margin: EdgeInsets.only(top: 23),
@@ -40,16 +68,20 @@ class _HomePageState extends State<HomePage> {
       );
     } else {
       return Container(
-        child: Image.file(imageFile),
-        height: 350,
-        margin: EdgeInsets.only(top: 23),
-        decoration: BoxDecoration(
-          color: Colors.black54,
+        child: ClipRRect(
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(50),
             bottomRight: Radius.circular(50),
           ),
+          child: Image.file(
+            _imageFile,
+            width: double.infinity,
+            height: 350,
+            fit: BoxFit.fitWidth,
+          ),
         ),
+        height: 350,
+        margin: EdgeInsets.only(top: 23),
       );
     }
   }
@@ -68,7 +100,9 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    _imgFromCamera();
+                  },
                   child: Container(
                     height: 120,
                     width: 120,
@@ -94,7 +128,9 @@ class _HomePageState extends State<HomePage> {
                   width: 60,
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    _imgFromGalery();
+                  },
                   child: Container(
                     height: 120,
                     width: 120,
@@ -119,7 +155,12 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              setState(() {
+                _imageFile = null;
+                _imgOuIcon();
+              });
+            },
             child: Container(
               margin: EdgeInsets.only(top: 20),
               height: 120,
